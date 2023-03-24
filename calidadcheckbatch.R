@@ -12,19 +12,19 @@ library(jsonlite)
 
 setwd("/media/pablo/Aldebaran/mri_redlat/mriqc_ma/json")
 
-# Definir una función para extraer el título y el autor de un archivo JSON
+# Definir una función para extraer info un archivo JSON
 extraer_info <- function(nombre_archivo) {
   # Cargar el archivo JSON
   archivo_json <- fromJSON(nombre_archivo)
   
-  # Extraer el título y el autor
+  # Extraer info
   dvars <- archivo_json$dvars_nstd #porcentaje de delta de cambio en BOLD
   fd_perc <- archivo_json$fd_perc # si el resultado esta entre 0 - 25 no se revisa, si el resultado esta entre 26-50 es optativo y es importante un sistema de corrección, mas de 50 % se requerira implementar sistemas de correccion sio el valor es
   tsnr <- archivo_json$tsnr # valores muy bajos (en compración con la media global) deben revisarse
   bidsmeta <- archivo_json$bids_meta #temporal
   idsub <- bidsmeta$subject_id # obtencion del id
   
-  # Devolver un vector con el título y el autor
+  # Devolver con la info requerido
   return(c(idsub, dvars, fd_perc, tsnr))
 }
 
