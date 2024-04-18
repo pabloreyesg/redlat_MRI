@@ -41,17 +41,43 @@ def extraer_info():
                 data = json.load(file)
 
                 # Verifica si las claves están presentes en el archivo
-                keys_to_extract = ["Manufacturer", "ManufacturersModelName", "InstitutionName", "ScanningSequence", "SliceThickness", "EchoTime","RepetitionTime","FlipAngle"]
+                keys_to_extract = ["Manufacturer", "ManufacturersModelName", "InstitutionName", "ScanningSequence", "SliceThickness", "EchoTime","RepetitionTime","FlipAngle","PhaseEncodingDirection","SpacingBetweenSlices"]
                 extracted_info = {
                     "Directory": directory,  # Agregar el nombre del directorio al resultado
                     "FileName": filename  # Agregar el nombre del archivo al resultado
                 }
 
+                # Verificar si el nombre del archivo contiene ciertas palabras clave
+                if "T1" in filename:
+                    extracted_info["ScanType"] = "T1"
+                elif "T2" in filename:
+                    extracted_info["ScanType"] = "T2"
+                elif "bold" in filename:
+                    extracted_info["ScanType"] = "BOLD"
+                elif "dwi" in filename:
+                    extracted_info["ScanType"] = "DWI"
+                else:
+                    extracted_info["ScanType"] = "Otro"
+
                 for key in keys_to_extract:
                     if key in data:
                         extracted_info[key] = data[key]
                     else:
-                        extracted_info[key] = "No se encontró información"
+                        extracted_info[key] = "NA"
+
+                # Agregar lógica adicional para SliceThickness
+                if extracted_info["ScanType"] == "T1":
+                    slice_thickness = float(extracted_info.get("SliceThickness", 0))
+                    if 0.9 <= slice_thickness <= 1.2:
+                        extracted_info["SliceValidity"] = "valid"
+                    elif 0.4 <= slice_thickness <= 0.6:
+                        extracted_info["SliceValidity"] = "downsampling"
+                    elif slice_thickness > 1.3:
+                        extracted_info["SliceValidity"] = "unvalid"
+                    else:
+                        extracted_info["SliceValidity"] = "Otro"
+                else:
+                    extracted_info["SliceValidity"] = "N/A"
 
                 extracted_info_list.append(extracted_info)
         except json.JSONDecodeError:
@@ -61,7 +87,7 @@ def extraer_info():
     # Escribe la información en un archivo CSV
     output_file = 'informacion_extraida.csv'
     with open(output_file, 'w', newline='') as csvfile:
-        fieldnames = ["Directory", "FileName"] + keys_to_extract  # Agregar el nombre del directorio y del archivo como encabezados
+        fieldnames = ["Directory", "FileName", "ScanType", "SliceValidity"] + keys_to_extract  # Agregar el nombre del directorio y del archivo como encabezados
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
