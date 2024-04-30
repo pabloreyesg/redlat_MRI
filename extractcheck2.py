@@ -41,7 +41,7 @@ def extraer_info():
                 data = json.load(file)
 
                 # Verifica si las claves están presentes en el archivo
-                keys_to_extract = ["Manufacturer", "ManufacturersModelName", "InstitutionName", "ScanningSequence", "SliceThickness"]
+                keys_to_extract = ["Manufacturer", "ManufacturersModelName", "InstitutionName", "ScanningSequence", "SliceThickness", "EchoTime","RepetitionTime","FlipAngle","PhaseEncodingDirection","SpacingBetweenSlices"]
                 extracted_info = {
                     "Directory": directory,  # Agregar el nombre del directorio al resultado
                     "FileName": filename  # Agregar el nombre del archivo al resultado
@@ -63,7 +63,7 @@ def extraer_info():
                     if key in data:
                         extracted_info[key] = data[key]
                     else:
-                        extracted_info[key] = "No se encontró información"
+                        extracted_info[key] = "NA"
 
                 # Agregar lógica adicional para SliceThickness
                 if extracted_info["ScanType"] == "T1":
